@@ -1,7 +1,7 @@
-async def check_user_subscriptions(user_id):
+from services.channel_service import ChannelService
+
+async def check_user_subscriptions(bot, user_id):
     """Check if user is subscribed to all required channels"""
-    from services.channel_service import ChannelService
-    from bot import bot
     
     # Get all enabled channels
     channel_service = ChannelService()

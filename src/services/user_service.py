@@ -5,6 +5,12 @@ from datetime import datetime
 class UserService:
     def __init__(self):
         self.session: Session = get_database_session()
+        
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close_session()
 
     def register_user(self, username: str, full_name: str, user_id: int = None) -> User:
         # Check if user with this ID already exists

@@ -33,6 +33,16 @@ class Channel(Base):
 
 def get_database_session():
     engine = create_engine(DATABASE_URL)
-    Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     return Session()
+
+# Добавляем класс SessionManager для работы с контекстным менеджером
+class SessionManager:
+    def __init__(self):
+        self.session = get_database_session()
+    
+    def __enter__(self):
+        return self.session
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.session.close()
