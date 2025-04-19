@@ -7,8 +7,10 @@ from handlers.admin import register_admin_handlers
 from utils.admin_utils import AdminFilter, AdminAccessFilter
 from middlewares.user_registration import UserRegistrationMiddleware, UserMiddleware
 from middlewares.subscription import SubscriptionMiddleware
+import server
 
-bot = Bot(token=BOT_TOKEN)
+# bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=BOT_TOKEN, server=server.TELEGRAM_TEST)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 dp.filters_factory.bind(AdminFilter)
