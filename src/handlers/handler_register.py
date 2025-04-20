@@ -7,10 +7,7 @@ from handlers.user.subscription import register_subscription_handlers
 from handlers.user.shop import register_shop_handlers
 from handlers.user.cart import register_cart_handlers
 from handlers.user.payment import register_payment_handlers
-
-# Импорт обработчиков администратора
-from handlers.admin import register_admin_handlers
-
+from handlers.admin import register_all_admin_handlers
 
 def register_all_handlers(dp: Dispatcher):
     """
@@ -25,6 +22,6 @@ def register_all_handlers(dp: Dispatcher):
     register_payment_handlers(dp)
     
     # Регистрация обработчиков администратора
-    register_admin_handlers(dp)
+    register_all_admin_handlers(dp)
     
     return dp

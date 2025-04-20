@@ -8,7 +8,7 @@ from middlewares.subscription import SubscriptionMiddleware
 import server
 
 # Импортируем новый регистратор обработчиков
-from handlers.user.handler_register import register_all_handlers
+from handlers.handler_register import register_all_handlers
 
 bot = Bot(token=BOT_TOKEN, server=server.TELEGRAM_TEST)
 storage = MemoryStorage()

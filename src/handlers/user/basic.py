@@ -197,7 +197,7 @@ async def text_handler(message: types.Message):
         from handlers.user.cart import cart_command
         await cart_command(message)
     elif text == "🔧 Панель администратора" and is_admin(message.from_user.id):
-        from handlers.admin import admin_panel
+        from handlers.admin.core import admin_panel
         await admin_panel(message)
 
 def register_basic_handlers(dp):
