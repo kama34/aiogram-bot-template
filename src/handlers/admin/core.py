@@ -1,18 +1,9 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
 from utils.admin_utils import is_admin
 from keyboards.admin_kb import admin_inlin_kb
-
-# Состояния для операций админа
-class AdminStates(StatesGroup):
-    waiting_for_search = State()
-    waiting_for_block_username = State()
-    waiting_for_unblock_username = State()
-    waiting_for_mass_message = State()
-    browsing_letters = State()
-    browsing_users_by_letter = State()
-    waiting_for_channel_input = State()
+# Импортируем AdminStates из нового модуля
+from .states import AdminStates
 
 async def admin_panel(message: types.Message):
     """Основная функция для отображения админ-панели"""
@@ -99,10 +90,10 @@ async def admin_callback_handler(callback: types.CallbackQuery, state: FSMContex
         await orig_message.delete()
         await orig_message.answer("Действие отменено.", reply_markup=admin_inlin_kb)
     elif callback.data == "text_search":
-        from .user_management import text_search_handler
+        from .user_management.search import text_search_handler  # Изменяем импорт
         await text_search_handler(callback, state)
     elif callback.data == "letter_search":
-        from .user_management import letter_search_handler
+        from .user_management.search import letter_search_handler  # Изменяем импорт
         await letter_search_handler(callback, state)
 
 def register_admin_handlers(dp: Dispatcher):

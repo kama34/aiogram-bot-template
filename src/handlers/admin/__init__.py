@@ -5,8 +5,7 @@ from .statistics import register_statistics_handlers
 from .referrals import register_referral_handlers
 from .channels import register_channel_handlers
 from .messaging import register_messaging_handlers
-from .helpers import return_to_channels_menu_handler
-from .actions import register_action_handlers
+from .actions import register_all_action_handlers
 
 def register_all_admin_handlers(dp: Dispatcher):
     """Регистрирует все обработчики для административной панели"""
@@ -29,4 +28,4 @@ def register_all_admin_handlers(dp: Dispatcher):
     register_messaging_handlers(dp)
     
     # Регистрация обработчиков действий с пользователями
-    register_action_handlers(dp)
+    register_all_action_handlers(dp)

@@ -127,8 +127,11 @@ async def view_user_referrals(callback: types.CallbackQuery):
     # Get user ID from callback data
     user_id = int(callback.data.replace("view_referrals_", ""))
     
-    # Save the original message to delete it
-    orig_message = callback.message
+    # Удаляем текущее сообщение
+    try:
+        await callback.message.delete()
+    except Exception as e:
+        print(f"Не удалось удалить сообщение: {e}")
     
     user_service = UserService()
     
@@ -141,9 +144,6 @@ async def view_user_referrals(callback: types.CallbackQuery):
         
         # Get all referrals by this user
         referrals = user_service.get_user_referrals(user_id)
-        
-        # Delete the previous message first
-        await orig_message.delete()
         
         if not referrals or len(referrals) == 0:
             # No referrals found - show message with back button
@@ -178,7 +178,7 @@ async def view_user_referrals(callback: types.CallbackQuery):
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(types.InlineKeyboardButton("◀️ Назад к пользователю", callback_data=f"back_to_user_{user_id}"))
         
-        # Send message after deleting previous one
+        # Send message without deleting (already deleted above)
         await callback.message.answer(referral_text, parse_mode="HTML", reply_markup=keyboard)
         
     except Exception as e:
