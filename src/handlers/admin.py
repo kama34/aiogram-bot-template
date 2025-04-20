@@ -702,9 +702,6 @@ async def admin_referral_link(message: types.Message):
     # Create buttons for the admin
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(
-        types.InlineKeyboardButton("📋 Скопировать ссылку", callback_data=f"copy_ref_{user_id}")
-    )
-    keyboard.add(
         types.InlineKeyboardButton(
             "📤 Поделиться", 
             switch_inline_query=f"Приглашаю тебя в наш бот! {referral_link}"

@@ -71,7 +71,7 @@ async def back_to_menu_callback(callback: types.CallbackQuery):
         price = get_product_price(product_id)
         products_kb.add(
             types.InlineKeyboardButton(
-                f"Продукт {product_id} - {price} ₽", 
+                f"Продукт {product_id} - {price} ⭐", 
                 callback_data=f"product_{product_id}"
             )
         )

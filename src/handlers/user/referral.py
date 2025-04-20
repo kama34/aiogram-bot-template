@@ -111,11 +111,6 @@ async def referral_command(message: types.Message):
     # Create share buttons with cleaner formatting
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     
-    # Direct link button
-    keyboard.add(
-        types.InlineKeyboardButton("🔗 Скопировать ссылку", callback_data=f"copy_ref_{user_id}")
-    )
-    
     # Share button - make sure no extra spaces or characters
     keyboard.add(
         types.InlineKeyboardButton(
