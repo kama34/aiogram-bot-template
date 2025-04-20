@@ -7,7 +7,7 @@ load_dotenv()
 BOT_TOKEN = "5000608497:AAHvnLodDAZKMxz4ED9K6DZDp54Nk-ZCPZ0"
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")  # Default to SQLite if not set
 # ADMIN_IDS = list(map(int, filter(None, os.getenv("ADMIN_IDS", "").split(","))))  # Comma-separated list of admin IDs as integers
-ADMIN_IDS = [5000601280, 7808908162]
+ADMIN_IDS = [7808908162] # 5000601280
 
 # Настройки платежной системы
 PAYMENT_PROVIDER_TOKEN = ""  
