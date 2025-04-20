@@ -117,6 +117,29 @@ async def next_page_handler(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await show_users_by_letter(callback.message, letter, page, state)
 
+# Модифицируем обработчик возврата к выбору буквы
+async def back_to_letter_search(callback: types.CallbackQuery, state: FSMContext):
+    """Обработчик возврата к выбору букв"""
+    try:
+        await callback.answer()
+    except Exception as e:
+        print(f"Error answering callback: {e}")
+    
+    # Сбрасываем состояние
+    current_state = await state.get_state()
+    if current_state is not None:
+        await state.finish()
+    
+    # Удаляем текущее сообщение
+    try:
+        await callback.message.delete()
+    except Exception as e:
+        print(f"Не удалось удалить сообщение: {e}")
+    
+    # Запускаем обработчик выбора буквы с флагом, указывающим, что сообщение уже удалено
+    from .search import letter_search_handler
+    await letter_search_handler(callback, state, skip_message_delete=True)
+
 def register_pagination_handlers(dp: Dispatcher):
     """Регистрирует обработчики для пагинации"""
     dp.register_callback_query_handler(letter_select_handler, lambda c: c.data.startswith("letter_"), 
@@ -127,3 +150,6 @@ def register_pagination_handlers(dp: Dispatcher):
                                       state=AdminStates.browsing_users_by_letter)
     dp.register_callback_query_handler(next_page_handler, lambda c: c.data == "next_page", 
                                       state=AdminStates.browsing_users_by_letter)
+    
+    # Добавляем обработчик для "letter_search" во всех состояниях
+    dp.register_callback_query_handler(back_to_letter_search, lambda c: c.data == "letter_search", state="*")

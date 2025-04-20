@@ -5,9 +5,17 @@ from keyboards.admin_kb import admin_inlin_kb
 # Импортируем AdminStates из нового модуля
 from .states import AdminStates
 
-async def admin_panel(message: types.Message):
-    """Основная функция для отображения админ-панели"""
-    if is_admin(message.from_user.id):
+# Изменяем функцию admin_panel, чтобы она могла принимать пользовательский ID
+async def admin_panel(message: types.Message, custom_user_id=None):
+    """Основная функция для отображения админ-панели
+    
+    Args:
+        message: Объект сообщения
+        custom_user_id: Пользовательский ID для проверки (используется при вызове из callback)
+    """
+    user_id = custom_user_id if custom_user_id is not None else message.from_user.id
+    
+    if is_admin(user_id):
         await message.answer("Панель администратора:", reply_markup=admin_inlin_kb)
     else:
         await message.answer("У вас нет прав доступа к панели администратора.")
@@ -81,8 +89,7 @@ async def admin_callback_handler(callback: types.CallbackQuery, state: FSMContex
         from .statistics import admin_my_referrals
         await admin_my_referrals(orig_message)
     elif callback.data == "admin_back":
-        await orig_message.delete()
-        await orig_message.answer("Панель администратора:", reply_markup=admin_inlin_kb)
+        await admin_back_handler(callback, state)
     elif callback.data == "cancel_state":
         current_state = await state.get_state()
         if current_state:
@@ -96,7 +103,37 @@ async def admin_callback_handler(callback: types.CallbackQuery, state: FSMContex
         from .user_management.search import letter_search_handler  # Изменяем импорт
         await letter_search_handler(callback, state)
 
+# Обновляем функцию admin_back_handler
+async def admin_back_handler(callback: types.CallbackQuery, state: FSMContext, skip_message_delete=False):
+    """Обработчик возврата в главное меню админа"""
+    if not is_admin(callback.from_user.id):
+        await callback.answer("У вас нет прав доступа!", show_alert=True)
+        return
+
+    try:
+        await callback.answer()
+    except Exception as e:
+        print(f"Ошибка при ответе на callback: {e}")
+    
+    # Сбрасываем любое текущее состояние
+    current_state = await state.get_state()
+    if current_state:
+        await state.finish()
+    
+    # Удаляем текущее сообщение только если его не удалили ранее
+    if not skip_message_delete:
+        try:
+            await callback.message.delete()
+        except Exception as e:
+            print(f"Не удалось удалить сообщение: {e}")
+    
+    # Показываем главное меню админа, передавая ID пользователя из callback
+    await admin_panel(callback.message, callback.from_user.id)
+
 def register_admin_handlers(dp: Dispatcher):
     """Регистрирует обработчики для основных админ-функций"""
     dp.register_message_handler(admin_panel, commands=["admin"])
-    dp.register_callback_query_handler(admin_callback_handler, lambda c: c.data.startswith(("admin_", "cancel_", "user_stats", "export_users", "search_user", "block_user", "unblock_user", "mass_message", "manage_channels", "referral_stats", "text_search", "letter_search")))
+    dp.register_callback_query_handler(admin_callback_handler, lambda c: c.data.startswith(("admin_", "cancel_", "user_stats", "export_users", "search_user", "block_user", "unblock_user", "mass_message", "manage_channels", "referral_stats", "text_search")))
+    
+    # Добавляем отдельную регистрацию для admin_back, которая работает во всех состояниях
+    dp.register_callback_query_handler(admin_back_handler, lambda c: c.data == "admin_back", state="*")

@@ -25,8 +25,14 @@ async def text_search_handler(callback: types.CallbackQuery, state: FSMContext):
     
     await AdminStates.waiting_for_search.set()
 
-async def letter_search_handler(callback: types.CallbackQuery, state: FSMContext):
-    """Обрабатывает поиск пользователя по первой букве"""
+async def letter_search_handler(callback: types.CallbackQuery, state: FSMContext, skip_message_delete=False):
+    """Обрабатывает поиск пользователя по первой букве
+    
+    Args:
+        callback: Объект callback запроса
+        state: Объект состояния FSM
+        skip_message_delete: Если True, не удалять текущее сообщение (уже удалено)
+    """
     if not is_admin(callback.from_user.id):
         await callback.answer("У вас нет прав доступа!", show_alert=True)
         return
@@ -40,7 +46,12 @@ async def letter_search_handler(callback: types.CallbackQuery, state: FSMContext
     if current_state is not None:
         await state.finish()
     
-    await callback.message.delete()
+    # Удаляем сообщение только если не было удалено ранее
+    if not skip_message_delete:
+        try:
+            await callback.message.delete()
+        except Exception as e:
+            print(f"Не удалось удалить сообщение: {e}")
     
     session = get_database_session()
     try:

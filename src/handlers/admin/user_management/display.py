@@ -1,4 +1,5 @@
 from aiogram import Dispatcher, types
+from aiogram.dispatcher import FSMContext
 from services.database import User
 from utils.admin_utils import is_admin
 
@@ -71,7 +72,7 @@ async def show_user_info(message, user, back_callback="letter_search", delete_pr
         chat_id = message.chat.id if hasattr(message, 'chat') else message.message.chat.id
         return await bot.send_message(chat_id, user_info, parse_mode="HTML", reply_markup=keyboard)
 
-async def view_user_handler(callback: types.CallbackQuery):
+async def view_user_handler(callback: types.CallbackQuery, state: FSMContext = None, skip_message_delete=False):
     """Обрабатывает просмотр информации о пользователе по ID"""
     if not is_admin(callback.from_user.id):
         await callback.answer("У вас нет прав доступа!", show_alert=True)
@@ -82,13 +83,20 @@ async def view_user_handler(callback: types.CallbackQuery):
     except Exception as e:
         print(f"Ошибка при ответе на callback: {e}")
     
+    # Очистим текущее состояние, если оно есть
+    if state:
+        current_state = await state.get_state()
+        if current_state:
+            await state.finish()
+    
     user_id = callback.data.replace("view_user_", "")
     
-    # Удаляем текущее сообщение с листингом пользователей
-    try:
-        await callback.message.delete()
-    except Exception as e:
-        print(f"Не удалось удалить сообщение: {e}")
+    # Удаляем текущее сообщение только если его не удалили ранее
+    if not skip_message_delete:
+        try:
+            await callback.message.delete()
+        except Exception as e:
+            print(f"Не удалось удалить сообщение: {e}")
     
     from services.database import get_database_session
     session = get_database_session()
@@ -111,4 +119,9 @@ async def view_user_handler(callback: types.CallbackQuery):
 
 def register_display_handlers(dp: Dispatcher):
     """Регистрирует обработчики отображения пользователей"""
-    dp.register_callback_query_handler(view_user_handler, lambda c: c.data and c.data.startswith("view_user_"))
+    # Регистрируем для всех состояний, используя state="*"
+    dp.register_callback_query_handler(
+        view_user_handler, 
+        lambda c: c.data and c.data.startswith("view_user_"),
+        state="*"
+    )
