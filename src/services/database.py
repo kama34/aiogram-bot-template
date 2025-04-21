@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, Sequence, Boolean, DateTime, BigInteger, func, UniqueConstraint, Float, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 
 DATABASE_URL = "sqlite:///./database.db"  # Update with your database URL
@@ -62,6 +62,11 @@ class Order(Base):
     status = Column(String, default="new")
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    # Отношение к пользователю
+    user = relationship('User', backref='orders')
+    # Отношение к товарам
+    items = relationship('OrderItem', backref='order', cascade="all, delete-orphan")
 
 class OrderItem(Base):
     __tablename__ = 'order_items'

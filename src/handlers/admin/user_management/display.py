@@ -41,22 +41,27 @@ async def show_user_info(message, user, back_callback="letter_search", delete_pr
     # Создаем клавиатуру с действиями
     keyboard = types.InlineKeyboardMarkup(row_width=2)
     
-    if hasattr(User, 'is_blocked'):
-        action = "Разблокировать" if user.is_blocked else "Заблокировать"
-        keyboard.add(types.InlineKeyboardButton(
-            action, callback_data=f"{'unblock' if user.is_blocked else 'block'}_{user.id}"
-        ))
+    # Блокировка / разблокировка
+    if hasattr(user, 'is_blocked'):
+        if user.is_blocked:
+            keyboard.add(types.InlineKeyboardButton("✅ Разблокировать", callback_data=f"unblock_{user.id}"))
+        else:
+            keyboard.add(types.InlineKeyboardButton("🚫 Заблокировать", callback_data=f"block_{user.id}"))
     
-    if hasattr(User, 'is_exception'):
-        exception_action = "Убрать исключение" if user.is_exception else "Сделать исключением"
-        keyboard.add(types.InlineKeyboardButton(
-            exception_action, callback_data=f"{'remove_exception' if user.is_exception else 'add_exception'}_{user.id}"
-        ))
+    # Исключения
+    if hasattr(user, 'is_exception'):
+        if user.is_exception:
+            keyboard.add(types.InlineKeyboardButton("⭕ Убрать из исключений", callback_data=f"remove_exception_{user.id}"))
+        else:
+            keyboard.add(types.InlineKeyboardButton("⭕ Добавить в исключения", callback_data=f"add_exception_{user.id}"))
     
-    keyboard.add(types.InlineKeyboardButton(
-        "👥 Рефералы", callback_data=f"view_referrals_{user.id}"
-    ))
+    # Рефералы и заказы (в один ряд)
+    keyboard.row(
+        types.InlineKeyboardButton("👥 Рефералы", callback_data=f"view_referrals_{user.id}"),
+        types.InlineKeyboardButton("🛍️ Заказы", callback_data=f"view_orders_{user.id}")
+    )
     
+    # Кнопка возврата
     keyboard.add(types.InlineKeyboardButton("◀️ Назад", callback_data=back_callback))
     
     # Определяем метод для отправки сообщения в зависимости от типа входного объекта
