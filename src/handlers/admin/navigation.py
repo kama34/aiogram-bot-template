@@ -36,10 +36,44 @@ async def back_to_search_options(callback: types.CallbackQuery, state: FSMContex
     keyboard.add(types.InlineKeyboardButton("◀️ Назад", callback_data="admin_back"))
     await callback.message.answer("Выберите метод поиска пользователя:", reply_markup=keyboard)
 
+async def cancel_state_handler(callback: types.CallbackQuery, state: FSMContext, skip_message_delete=False):
+    """
+    Обработчик для отмены текущего состояния и возврата в админ-панель
+    """
+    if not is_admin(callback.from_user.id):
+        await callback.answer("У вас нет прав доступа!", show_alert=True)
+        return
+    
+    try:
+        await callback.answer()
+    except Exception as e:
+        print(f"Ошибка при ответе на callback: {e}")
+    
+    # Сбрасываем текущее состояние
+    current_state = await state.get_state()
+    if current_state is not None:
+        await state.finish()
+    
+    # Удаляем текущее сообщение если нужно
+    if not skip_message_delete:
+        try:
+            await callback.message.delete()
+        except Exception as e:
+            print(f"Не удалось удалить сообщение: {e}")
+    
+    # Отображаем сообщение об отмене
+    from keyboards.admin_kb import admin_inlin_kb
+    await callback.message.answer("Действие отменено.", reply_markup=admin_inlin_kb)
+
 def register_navigation_handlers(dp: Dispatcher):
     """Регистрирует навигационные обработчики для админ-панели"""
     dp.register_callback_query_handler(
         back_to_search_options,
         lambda c: c.data == "search_user",
+        state="*"
+    )
+    dp.register_callback_query_handler(
+        cancel_state_handler,
+        lambda c: c.data == "cancel_state",
         state="*"
     )
