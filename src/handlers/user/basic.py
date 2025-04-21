@@ -190,7 +190,7 @@ async def text_handler(message: types.Message):
     elif text == "👥 Мои рефералы":
         from handlers.user.referral import my_referrals_command
         await my_referrals_command(message)
-    elif text == "🛒 Меню":
+    elif text == "🛒 Магазин":
         from handlers.user.shop import menu_command
         await menu_command(message)
     elif text == "🧺 Корзина":

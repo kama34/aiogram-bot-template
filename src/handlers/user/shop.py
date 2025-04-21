@@ -94,7 +94,7 @@ async def go_to_menu_callback(callback: types.CallbackQuery):
 def register_shop_handlers(dp: Dispatcher):
     """Регистрация всех обработчиков для функций магазина"""
     # Регистрация обработчика для кнопки меню
-    dp.register_message_handler(menu_command, lambda message: message.text == "🛒 Меню", state="*")
+    dp.register_message_handler(menu_command, lambda message: message.text == "🛒 Магазин", state="*")
     
     # Регистрация обработчика выбора продукта
     dp.register_callback_query_handler(product_callback, lambda c: c.data.startswith("product_"))
