@@ -38,9 +38,10 @@ async def show_users_by_letter(message, letter, page, state):
     """Показывает пользователей с именами, начинающимися на указанную букву"""
     session = get_database_session()
     try:
+        # Изменяем фильтр на first_name вместо username
         users_query = session.query(User).filter(
-            func.upper(func.substr(User.username, 1, 1)) == letter.upper()
-        ).order_by(User.username)
+            func.upper(func.substr(User.full_name, 1, 1)) == letter.upper()
+        ).order_by(User.full_name)  # Также меняем сортировку
         
         total_users = users_query.count()
         

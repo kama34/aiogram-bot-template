@@ -59,8 +59,9 @@ async def letter_search_handler(callback: types.CallbackQuery, state: FSMContext
         
         first_letters = set()
         for user in users:
-            if user.username and len(user.username) > 0:
-                first_letters.add(user.username[0].upper())
+            # Изменяем проверку на full_name вместо username
+            if user.full_name and len(user.full_name) > 0:
+                first_letters.add(user.full_name[0].upper())
         
         first_letters = sorted(list(first_letters))
         
@@ -71,11 +72,12 @@ async def letter_search_handler(callback: types.CallbackQuery, state: FSMContext
         for letter in first_letters:
             letter_buttons.append(types.InlineKeyboardButton(letter, callback_data=f"letter_{letter}"))
         
+        # Группировка кнопок по 4 в ряд
         for i in range(0, len(letter_buttons), 4):
             row_buttons = letter_buttons[i:i+4]
             keyboard.row(*row_buttons)
         
-        # Важно: используем callback_data="search_user" для кнопки назад
+        # Добавление кнопки "Назад"
         keyboard.add(types.InlineKeyboardButton("◀️ Назад", callback_data="search_user"))
         
         await callback.message.answer("Выберите первую букву имени пользователя:", reply_markup=keyboard)
