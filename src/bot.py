@@ -11,10 +11,10 @@ import server
 from handlers.handler_register import register_all_handlers
 
 # В начале файла после других импортов:
-from services.database_fix import fix_database_relationships
+from services.database_relations import setup_database_relationships
 
 # Перед созданием диспетчера:
-fix_database_relationships()
+setup_database_relationships()
 
 bot = Bot(token=BOT_TOKEN, server=server.TELEGRAM_TEST)
 storage = MemoryStorage()

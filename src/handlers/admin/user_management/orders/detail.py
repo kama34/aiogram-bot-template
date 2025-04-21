@@ -1,15 +1,16 @@
 from aiogram import types
 from utils.admin_utils import is_admin
 from services.order_service import OrderService
+import traceback
 
 # Вспомогательная функция
 def get_product_name(product_id):
-    """Получает имя продукта по его ID (заглушка)"""
-    # Это заглушка, в реальном приложении здесь будет обращение к базе данных или сервису продуктов
+    """Получает имя продукта по его ID"""
+    # Заглушка, в реальной системе здесь будет обращение к базе данных
     return f"Товар #{product_id}"
 
 async def view_order_details(callback: types.CallbackQuery):
-    """Просмотр деталей конкретного заказа"""
+    """Просмотр деталей конкретного заказа с улучшенной обработкой ошибок"""
     if not is_admin(callback.from_user.id):
         await callback.answer("У вас нет прав доступа!", show_alert=True)
         return
@@ -28,21 +29,25 @@ async def view_order_details(callback: types.CallbackQuery):
     except Exception as e:
         print(f"Не удалось удалить сообщение: {e}")
     
-    # Получаем данные заказа
+    # Создаем сервис для работы с заказами
     order_service = OrderService()
     
     try:
-        # Получаем заказ и его элементы
+        # Получаем данные заказа
         order = order_service.get_order_by_id(order_id)
         if not order:
             await callback.message.answer("Заказ не найден")
             return
         
-        # Получаем пользователя и товары заказа
+        # Получаем данные пользователя и товаров
         user = order_service.get_user_by_id(order.user_id)
         items = order_service.get_order_items(order_id)
         
-        # Статусы заказа с эмодзи
+        # Форматируем данные для отображения
+        order_date = order.created_at.strftime("%d.%m.%Y %H:%M") if hasattr(order, "created_at") else "неизвестно"
+        user_name = f"{user.full_name} (@{user.username})" if user and user.username else f"ID: {order.user_id}"
+        
+        # Статусы заказа
         status_display = {
             "new": "🆕 Новый",
             "paid": "💰 Оплачен",
@@ -52,50 +57,71 @@ async def view_order_details(callback: types.CallbackQuery):
             "cancelled": "❌ Отменён"
         }
         
-        # Формируем сообщение с деталями
-        order_date = order.created_at.strftime("%d.%m.%Y %H:%M")
+        status = getattr(order, "status", "unknown")
+        status_text = status_display.get(status, f"Неизвестный статус ({status})")
+        
+        # Формируем сообщение
         message_text = (
             f"📝 <b>Детали заказа #{order.id}</b>\n\n"
             f"📅 Дата: {order_date}\n"
-            f"👤 Пользователь: {user.full_name} (@{user.username})\n"
-            f"💰 Сумма заказа: {order.total_amount:.2f} ₽\n"
-            f"🔖 Статус: {status_display.get(order.status, order.status)}\n"
+            f"👤 Пользователь: {user_name}\n"
+            f"💰 Сумма заказа: {order.total_amount*100:.2f} ⭐\n"
+            f"🔖 Статус: {status_text}\n"
         )
         
-        if order.payment_id:
+        if hasattr(order, "payment_id") and order.payment_id:
             message_text += f"🆔 ID платежа: <code>{order.payment_id}</code>\n"
             
-        if order.shipping_address:
+        if hasattr(order, "shipping_address") and order.shipping_address:
             message_text += f"📫 Адрес доставки: {order.shipping_address}\n"
         
-        # Добавляем список товаров
+        # Добавляем список товаров в заказе
         message_text += "\n<b>Содержимое заказа:</b>\n"
         
         if items:
             for i, item in enumerate(items, 1):
                 product_name = get_product_name(item.product_id)
                 item_total = item.price * item.quantity
-                message_text += f"{i}. <b>{product_name}</b> - {item.quantity} шт. × {item.price:.2f} ₽ = {item_total:.2f} ₽\n"
+                message_text += f"{i}. <b>{product_name}</b> - {item.quantity} шт. × {item.price:.2f} ⭐ = {item_total:.2f} ⭐\n"
         else:
             message_text += "Нет данных о товарах в этом заказе\n"
         
         # Создаем клавиатуру
         keyboard = types.InlineKeyboardMarkup()
-        
-        # Кнопки навигации
         keyboard.add(types.InlineKeyboardButton(
             "◀️ К списку заказов",
             callback_data=f"view_orders_{order.user_id}"
         ))
-        
         keyboard.add(types.InlineKeyboardButton(
             "👤 К профилю пользователя",
             callback_data=f"back_to_user_{order.user_id}"
         ))
         
+        # Отправляем результат
         await callback.message.answer(message_text, parse_mode="HTML", reply_markup=keyboard)
         
     except Exception as e:
-        await callback.message.answer(f"Ошибка при получении деталей заказа: {str(e)}")
+        error_text = f"Ошибка при получении деталей заказа: {str(e)}\n\n"
+        error_text += traceback.format_exc()
+        print(error_text)
+        
+        # Отправляем более короткое сообщение пользователю
+        keyboard = types.InlineKeyboardMarkup()
+        if order and hasattr(order, "user_id"):
+            user_id = order.user_id
+            keyboard.add(types.InlineKeyboardButton(
+                "◀️ К списку заказов",
+                callback_data=f"view_orders_{user_id}"
+            ))
+        else:
+            keyboard.add(types.InlineKeyboardButton(
+                "◀️ Назад в админ-панель",
+                callback_data="admin_back"
+            ))
+        
+        await callback.message.answer(
+            f"❌ Произошла ошибка при загрузке деталей заказа: {type(e).__name__}",
+            reply_markup=keyboard
+        )
     finally:
         order_service.close_session()

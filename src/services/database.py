@@ -55,7 +55,8 @@ class Order(Base):
     __tablename__ = 'orders'
     
     id = Column(Integer, primary_key=True)
-    user_id = Column(BigInteger, nullable=False)
+    # Важно: устанавливаем ForeignKey и используем тот же тип данных, что и в User.id
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     total_amount = Column(Float, nullable=False)
     payment_id = Column(String, nullable=True)
     shipping_address = Column(String, nullable=True)
@@ -63,9 +64,8 @@ class Order(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
-    # Отношение к пользователю
-    user = relationship('User', backref='orders')
-    # Отношение к товарам
+    # Определяем отношение с явным условием соединения
+    user = relationship('User', foreign_keys=[user_id], backref="orders")
     items = relationship('OrderItem', backref='order', cascade="all, delete-orphan")
 
 class OrderItem(Base):
