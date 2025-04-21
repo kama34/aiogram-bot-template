@@ -12,9 +12,16 @@ from handlers.handler_register import register_all_handlers
 
 # В начале файла после других импортов:
 from services.database_relations import setup_database_relationships
+from services.database import create_tables
+from services.check_database import check_database_structure, fix_inventory_table
+from services.db_migrations import run_migrations
 
 # Перед созданием диспетчера:
 setup_database_relationships()
+create_tables()
+check_database_structure()
+fix_inventory_table()
+run_migrations()
 
 bot = Bot(token=BOT_TOKEN, server=server.TELEGRAM_TEST)
 storage = MemoryStorage()

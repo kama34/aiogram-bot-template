@@ -1,4 +1,6 @@
 from aiogram import Dispatcher
+
+from handlers.admin.product_management import register_product_management_handlers
 from .core import register_admin_handlers
 from .user_management import register_user_management_handlers
 from .statistics import register_statistics_handlers
@@ -14,3 +16,4 @@ def register_all_admin_handlers(dp: Dispatcher):
     register_referral_handlers(dp)
     register_channel_handlers(dp)
     register_messaging_handlers(dp)
+    register_product_management_handlers(dp)

@@ -15,7 +15,8 @@ admin_inlin_kb.add(
     InlineKeyboardButton("👥 Рефералка", callback_data="referral_stats"),
 )
 admin_inlin_kb.add(
-    InlineKeyboardButton("🔗 Пригласительная ссылка", callback_data="admin_ref_link")
+    InlineKeyboardButton("🔗 Пригласительная ссылка", callback_data="admin_ref_link"),
+    InlineKeyboardButton("🛒 Товары", callback_data="manage_products")
 )
 
 # Admin-specific keyboard with admin panel button

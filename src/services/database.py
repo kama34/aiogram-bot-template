@@ -1,9 +1,14 @@
-from sqlalchemy import create_engine, Column, Integer, String, Sequence, Boolean, DateTime, BigInteger, func, UniqueConstraint, Float, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Sequence, Boolean, DateTime, BigInteger, func, UniqueConstraint, Float, ForeignKey, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 
-DATABASE_URL = "sqlite:///./database.db"  # Update with your database URL
+# Глобальная переменная для соединения с базой данных
+DATABASE_URL = "sqlite:///database.db"  # Измените, если используете другую БД
+engine = create_engine(DATABASE_URL)
+
+# Создаем фабрику сессий
+SessionLocal = sessionmaker(bind=engine)
 
 Base = declarative_base()
 
@@ -45,11 +50,34 @@ class CartItem(Base):
     )
 
 class ProductInventory(Base):
+    """Модель инвентаря товара"""
     __tablename__ = 'product_inventory'
     
-    product_id = Column(String, primary_key=True)
-    stock = Column(Integer, nullable=False, default=0)
+    id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
+    stock = Column(Integer, default=0)
+    reserved = Column(Integer, default=0)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    # Связь с товаром
+    product = relationship("Product", back_populates="inventory")
+
+class Product(Base):
+    """Модель товара"""
+    __tablename__ = 'products'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    price = Column(Float, nullable=False)
+    image_url = Column(String, nullable=True)
+    category = Column(String, nullable=True)
+    active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    # Связь с инвентарем
+    inventory = relationship("ProductInventory", uselist=False, back_populates="product", cascade="all, delete-orphan")
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -79,9 +107,17 @@ class OrderItem(Base):
     created_at = Column(DateTime, default=func.now())
 
 def get_database_session():
-    engine = create_engine(DATABASE_URL)
-    Session = sessionmaker(bind=engine)
-    return Session()
+    """
+    Создает и возвращает новую сессию базы данных
+    """
+    return SessionLocal()
+
+# Создаем таблицы в базе данных
+def create_tables():
+    """
+    Создает все таблицы в базе данных, если они не существуют
+    """
+    Base.metadata.create_all(engine)
 
 # Добавляем класс SessionManager для работы с контекстным менеджером
 class SessionManager:
