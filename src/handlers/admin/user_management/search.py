@@ -64,6 +64,7 @@ async def letter_search_handler(callback: types.CallbackQuery, state: FSMContext
         
         first_letters = sorted(list(first_letters))
         
+        # Убедимся, что клавиатура выбора букв создается правильно
         keyboard = types.InlineKeyboardMarkup(row_width=4)
         letter_buttons = []
         
@@ -74,6 +75,7 @@ async def letter_search_handler(callback: types.CallbackQuery, state: FSMContext
             row_buttons = letter_buttons[i:i+4]
             keyboard.row(*row_buttons)
         
+        # Важно: используем callback_data="search_user" для кнопки назад
         keyboard.add(types.InlineKeyboardButton("◀️ Назад", callback_data="search_user"))
         
         await callback.message.answer("Выберите первую букву имени пользователя:", reply_markup=keyboard)

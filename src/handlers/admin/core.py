@@ -130,10 +130,13 @@ async def admin_back_handler(callback: types.CallbackQuery, state: FSMContext, s
     # Показываем главное меню админа, передавая ID пользователя из callback
     await admin_panel(callback.message, callback.from_user.id)
 
+from .navigation import register_navigation_handlers
+
 def register_admin_handlers(dp: Dispatcher):
     """Регистрирует обработчики для основных админ-функций"""
     dp.register_message_handler(admin_panel, commands=["admin"])
-    dp.register_callback_query_handler(admin_callback_handler, lambda c: c.data.startswith(("admin_", "cancel_", "user_stats", "export_users", "search_user", "block_user", "unblock_user", "mass_message", "manage_channels", "referral_stats", "text_search")))
-    
-    # Добавляем отдельную регистрацию для admin_back, которая работает во всех состояниях
+    dp.register_callback_query_handler(admin_callback_handler, lambda c: c.data.startswith(("admin_", "cancel_", "user_stats", "export_users", "block_user", "unblock_user", "mass_message", "manage_channels", "referral_stats", "text_search")))
     dp.register_callback_query_handler(admin_back_handler, lambda c: c.data == "admin_back", state="*")
+    
+    # Регистрируем навигационные обработчики
+    register_navigation_handlers(dp)
