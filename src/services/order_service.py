@@ -34,19 +34,11 @@ class OrderService:
         first_order = self.session.query(Order).filter(Order.user_id == user_id).order_by(Order.created_at.asc()).first()
         last_order = self.session.query(Order).filter(Order.user_id == user_id).order_by(Order.created_at.desc()).first()
         
-        # Если есть заказы, вычисляем период
-        if first_order and last_order:
-            first_date = first_order.created_at
-            last_date = last_order.created_at
-        else:
-            first_date = None
-            last_date = None
-        
         return {
             "total_orders": total_orders,
             "total_spent": total_spent,
-            "first_date": first_date,
-            "last_date": last_date
+            "first_date": first_order.created_at if first_order else None,
+            "last_date": last_order.created_at if last_order else None
         }
     
     def get_user_by_id(self, user_id):

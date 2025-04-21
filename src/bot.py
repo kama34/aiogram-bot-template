@@ -10,6 +10,12 @@ import server
 # Импортируем новый регистратор обработчиков
 from handlers.handler_register import register_all_handlers
 
+# В начале файла после других импортов:
+from services.database_fix import fix_database_relationships
+
+# Перед созданием диспетчера:
+fix_database_relationships()
+
 bot = Bot(token=BOT_TOKEN, server=server.TELEGRAM_TEST)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
