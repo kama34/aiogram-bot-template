@@ -1,13 +1,17 @@
 from aiogram import types
 from utils.admin_utils import is_admin
 from services.order_service import OrderService
+from services.product_service import get_product_by_id
 import traceback
 
 # Вспомогательная функция
 def get_product_name(product_id):
     """Получает имя продукта по его ID"""
-    # Заглушка, в реальной системе здесь будет обращение к базе данных
-    return f"Товар #{product_id}"
+    # ИСПРАВЛЕНО: Используем данные из базы данных
+    product = get_product_by_id(product_id)
+    if product:
+        return product.get('name', f"Товар #{product_id}")
+    return f"Товар #{product_id}"  # Возвращаем заглушку только если товар не найден
 
 async def view_order_details(callback: types.CallbackQuery):
     """Просмотр деталей конкретного заказа с улучшенной обработкой ошибок"""
