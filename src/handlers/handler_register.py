@@ -9,19 +9,14 @@ from handlers.user.cart import register_cart_handlers
 from handlers.user.payment import register_payment_handlers
 from handlers.user.order import register_order_handlers
 from handlers.admin import register_all_admin_handlers
+from handlers.user import register_all_user_handlers
 
 def register_all_handlers(dp: Dispatcher):
     """
     Регистрация всех обработчиков сообщений и callback-запросов бота
     """
     # Регистрация обработчиков пользователя
-    register_basic_handlers(dp)
-    register_referral_handlers(dp)
-    register_subscription_handlers(dp)
-    register_shop_handlers(dp)
-    register_cart_handlers(dp)
-    register_payment_handlers(dp)
-    register_order_handlers(dp)
+    register_all_user_handlers(dp)
     
     # Регистрация обработчиков администратора
     register_all_admin_handlers(dp)

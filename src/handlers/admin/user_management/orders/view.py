@@ -45,7 +45,7 @@ async def view_user_orders(callback: types.CallbackQuery):
             message_text = (
                 f"🛍️ <b>Заказы пользователя {user.full_name} (@{user.username}):</b>\n\n"
                 f"Всего заказов: <b>{stats['total_orders']}</b>\n"
-                f"Общая сумма покупок: <b>{stats['total_spent']:.2f} ⭐</b>\n"
+                f"Общая сумма покупок: <b>{stats['total_spent']*100:.2f} ⭐</b>\n"
             )
             
             if stats["first_date"] and stats["last_date"]:

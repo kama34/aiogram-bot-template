@@ -14,3 +14,7 @@ user_kb.add(
     KeyboardButton("🔗 Реферальная ссылка"),
     KeyboardButton("👥 Мои рефералы")
 )
+
+user_kb.add(
+    KeyboardButton("🛍️ Мои заказы")
+)

@@ -196,6 +196,9 @@ async def text_handler(message: types.Message):
     elif text == "🧺 Корзина":
         from handlers.user.cart import cart_command
         await cart_command(message)
+    elif text == "🛍️ Мои заказы":  # Добавляем новое условие для кнопки "Мои заказы"
+        from handlers.user.orders.list import view_my_orders
+        await view_my_orders(message)
     elif text == "🔧 Панель администратора" and is_admin(message.from_user.id):
         from handlers.admin.core import admin_panel
         await admin_panel(message)
@@ -218,5 +221,6 @@ def register_basic_handlers(dp):
                                   "👥 Мои рефералы",
                                   "🛒 Магазин",
                                   "🧺 Корзина",
+                                  "🛍️ Мои заказы",  # Добавляем новое условие для кнопки "Мои заказы"
                                   "🔧 Панель администратора"
                               ])
